@@ -36,76 +36,24 @@ const App: React.FC = () => {
       setCurrentStepId(defaultSteps[0].id);
     }
     
-    // Default config
-    let config = { fn: 'x^2', x0: 1, order: 0, p1: 0.5, p2: 0.3 };
+    // Default configs for topics
+    let config = { fn: 'x^2', x0: 2, order: 0, p1: 1.0, p2: 1.0 };
 
     switch(topic) {
-      // Unit 1 Limits
+      case MathTopic.LIMIT_DEFINITION:
+        config = { fn: 'x^2', x0: 2, order: 0, p1: 1.0, p2: 1.0 }; 
+        break;
       case MathTopic.LIMIT_ONESIDED:
-        config = { fn: 'x / abs(x)', x0: 0, order: 0, p1: 0.5, p2: 0.5 }; // Sign function
+        config = { fn: 'x / abs(x)', x0: 0, order: 0, p1: 0.5, p2: 0.5 };
         break;
       case MathTopic.LIMIT_INFINITE:
         config = { fn: '1/x', x0: 0, order: 0, p1: 0.5, p2: 0.5 };
         break;
-      case MathTopic.SQUEEZE_THEOREM:
-        config = { fn: 'x^2 * sin(1/x)', x0: 0, order: 1, p1: 1, p2: 1 };
-        break;
-        
-      // Unit 2 Derivatives
-      case MathTopic.LINEAR_APPROX:
-        config = { fn: 'sqrt(x)', x0: 4, order: 1, p1: 1, p2: 1 }; // Good for linearization
-        break;
-      case MathTopic.CHAIN_RULE:
-        config = { fn: 'sin(x^2)', x0: 1, order: 1, p1: 1, p2: 1 };
-        break;
-
-      // Unit 3 MVT
-      case MathTopic.MVT_ROLLE:
-        config = { fn: 'cos(x)', x0: 0, order: 0, p1: 0.5, p2: 0.5 };
-        break;
-      case MathTopic.MVT_LAGRANGE:
-        config = { fn: 'x^2 - 2x', x0: 1.5, order: 0, p1: 0.5, p2: 0.5 };
-        break;
-      case MathTopic.LHOPITAL_RULE:
-        config = { fn: 'sin(x)/x', x0: 0, order: 1, p1: 1, p2: 1 };
-        break;
-      case MathTopic.CONCAVITY_CURVE:
-        config = { fn: 'x^3 - 3x', x0: 0, order: 2, p1: 1, p2: 1 };
-        break;
-      case MathTopic.OPTIMIZATION:
-        config = { fn: '-x^2 + 4x', x0: 2, order: 1, p1: 1, p2: 1 };
-        break;
-
-      // Unit 4 Integrals
-      case MathTopic.INTEGRAL_BASIC:
-        config = { fn: 'x^2', x0: 1, order: 1, p1: 10, p2: 1 }; 
-        break;
-      case MathTopic.FTC:
-        config = { fn: '0.5x + 1', x0: 2, order: 1, p1: 1, p2: 1 };
-        break;
-      case MathTopic.INTEGRATION_SUBSTITUTION:
-        config = { fn: '2x * e^(x^2)', x0: 1, order: 1, p1: 1, p2: 1 }; // u-sub classic
-        break;
-
-      // Unit 5 & 6 Applications
-      case MathTopic.VOLUME_ROTATION:
-        config = { fn: 'sqrt(x)', x0: 1, order: 1, p1: 10, p2: 1 };
-        break;
-      case MathTopic.DE_LOGISTIC:
-        config = { fn: '1 / (1 + e^(-x))', x0: 0, order: 0, p1: 1, p2: 1 };
-        break;
-
-      // Unit 7 Series
       case MathTopic.TAYLOR_SERIES:
         config = { fn: 'sin(x)', x0: 0, order: 3, p1: 1, p2: 1 };
         break;
-      case MathTopic.POWER_SERIES:
-        config = { fn: '1 / (1 - x)', x0: 0, order: 5, p1: 1, p2: 1 };
-        break;
-        
-      // Unit 8 Multi
-      case MathTopic.LAGRANGE_MULTIPLIER:
-        config = { fn: 'x^2 + y^2', x0: 1, order: 1, p1: 1, p2: 1 };
+      case MathTopic.INTEGRAL_BASIC:
+        config = { fn: 'x^2', x0: 1, order: 1, p1: 10, p2: 1 }; 
         break;
     }
 
@@ -124,7 +72,7 @@ const App: React.FC = () => {
 
   return (
     <div className="flex h-screen w-full bg-[#050505] overflow-hidden text-white selection:bg-blue-500/30 font-sans">
-      <nav className="w-16 border-r border-white/5 flex flex-col items-center py-6 gap-6 bg-black z-50">
+      <nav className="w-16 border-r border-white/5 flex flex-col items-center py-6 gap-6 bg-black z-50 shrink-0">
         <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20 mb-4 cursor-pointer" onClick={() => handleTopicJump(MathTopic.LIMIT_DEFINITION)}>
           <span className="font-black text-xl italic">Σ</span>
         </div>
@@ -139,13 +87,13 @@ const App: React.FC = () => {
         </div>
       </nav>
 
-      <aside className={`transition-all duration-300 border-r border-white/5 flex flex-col h-full bg-[#0a0a0a] ${sidebarCollapsed ? 'w-0 opacity-0 overflow-hidden' : 'w-[420px]'}`}>
-        <div className="p-6 border-b border-white/5 bg-gradient-to-b from-white/[0.02] to-transparent">
+      <aside className={`transition-all duration-300 border-r border-white/5 flex flex-col h-full bg-[#0a0a0a] overflow-hidden ${sidebarCollapsed ? 'w-0 opacity-0' : 'w-[420px]'}`}>
+        <div className="p-6 border-b border-white/5 bg-gradient-to-b from-white/[0.02] to-transparent shrink-0">
           <div className="flex items-center justify-between mb-4">
              <h2 className="text-xs font-black text-white/20 uppercase tracking-[0.2em]">{activeUnit.name}</h2>
              <span className="text-[10px] text-blue-500/60 font-mono bg-blue-500/10 px-2 py-0.5 rounded tracking-tighter">U{activeUnit.id.replace('u', '')}</span>
           </div>
-          <div className="space-y-4 max-h-[50vh] overflow-y-auto custom-scrollbar pr-2">
+          <div className="space-y-4 max-h-[30vh] overflow-y-auto custom-scrollbar pr-2">
             {activeUnit.chapters.map(chapter => (
               <div key={chapter.id} className="space-y-2">
                 <div className="flex items-center gap-2 text-[10px] font-bold text-white/40 mb-1">
@@ -164,12 +112,19 @@ const App: React.FC = () => {
             ))}
           </div>
         </div>
-        <div className="flex-1 overflow-hidden px-8 py-6">
-          <DerivationPanel topic={topic} currentStepId={currentStepId} onStepSelect={setCurrentStepId} onTopicJump={handleTopicJump} />
+        
+        {/* CRITICAL: This container is flex-1 and min-h-0 to strictly fill remaining space */}
+        <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+          <DerivationPanel 
+            topic={topic} 
+            currentStepId={currentStepId} 
+            onStepSelect={setCurrentStepId} 
+            onTopicJump={handleTopicJump} 
+          />
         </div>
       </aside>
 
-      <main className="flex-1 flex flex-col h-full p-6 gap-6 overflow-hidden relative">
+      <main className="flex-1 flex flex-col h-full p-6 gap-6 overflow-hidden relative min-w-0">
         <button onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
           className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-16 bg-white/5 border border-l-0 border-white/10 rounded-r-lg flex items-center justify-center group hover:bg-white/10 transition-all z-10">
           <div className={`w-1 h-4 bg-white/20 rounded-full group-hover:bg-blue-500 transition-all ${sidebarCollapsed ? 'translate-x-0.5' : ''}`} />
@@ -177,13 +132,13 @@ const App: React.FC = () => {
 
         <header className="flex justify-between items-end shrink-0">
           <div className="space-y-1">
-            <h2 className="text-4xl font-black tracking-tighter bg-gradient-to-r from-white to-white/30 bg-clip-text text-transparent italic">
+            <h2 className="text-4xl font-black tracking-tighter bg-gradient-to-r from-white to-white/30 bg-clip-text text-transparent italic truncate max-w-2xl">
               {UNITS.flatMap(u => u.chapters).flatMap(c => c.topics).find(t => t.id === topic)?.name}
             </h2>
             <div className="flex items-center gap-2 text-[10px] text-white/30 uppercase font-bold tracking-widest">
                <span className="text-blue-500">Intuition Architect</span>
                <span>/</span>
-               <span>Visualizing: {currentStep.title}</span>
+               <span className="truncate">Visualizing: {currentStep.title}</span>
             </div>
           </div>
         </header>

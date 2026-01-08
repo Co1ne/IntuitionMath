@@ -186,8 +186,42 @@ export const UNITS: Unit[] = [
 export const TOPIC_CONTENT: Record<MathTopic, DerivationStep[]> = {
   // Unit 1
   [MathTopic.LIMIT_DEFINITION]: [
-    { id: 'ed-0', title: '误差控制', goal: '将“无限接近”数学化', assumption: '任意容差 ε > 0', expression: '|f(x) - L| < ε', explanation: '极限不是动态的过程，而是静态的控制能力。只要你能给定任意小的误差范围，我都能找到对应的控制范围。', isCompleted: true },
-    { id: 'ed-1', title: '寻找 δ', goal: '锁定自变量区域', assumption: '存在 δ > 0', expression: '0 < |x - x₀| < δ', explanation: '这是对挑战的回应：你划定目标靶心（ε），我划定射击站位（δ）。', isCompleted: true }
+    { 
+      id: 'ed-0', 
+      title: 'Step 1: 怀疑者的挑战 (ε)', 
+      goal: '不要急着算数，先看挑战', 
+      assumption: '设定容差 ε (拖动滑块)', 
+      expression: '挑战: |f(x) - L| < ε', 
+      explanation: '想象你在制造零件。怀疑者（ε）画了两条黄线，要求：不管你怎么动，在这个高度区间内，函数值不能跑出去。如果跑出去了，就是次品。', 
+      isCompleted: true 
+    },
+    { 
+      id: 'ed-1', 
+      title: 'Step 2: 你的回应 (δ)', 
+      goal: '寻找安全区', 
+      assumption: '设定输入范围 δ (拖动滑块)', 
+      expression: '回应: |x - x₀| < δ', 
+      explanation: '为了赢得挑战，你需要在 x 轴上圈一块地（绿色区域）。试着缩小 δ 滑块，直到红线完全变绿。这意味着：只要 x 在这块地里，y 就绝对安全。', 
+      isCompleted: true 
+    },
+    { 
+      id: 'ed-2', 
+      title: 'Step 3: 极限的博弈', 
+      goal: '验证任意性', 
+      assumption: '更小的 ε', 
+      expression: '∀ ε > 0', 
+      explanation: '如果怀疑者把 ε 变得非常非常小（把 ε 滑块拉到左边），你还能找到一个新的 δ 来变绿吗？如果无论 ε 多小，你都能找到对应的 δ，那么极限存在。', 
+      isCompleted: true 
+    },
+    { 
+      id: 'ed-3', 
+      title: 'Step 4: 翻译成数学', 
+      goal: '将图形语言转化为符号', 
+      assumption: '如果 x 靠近... 那么 f(x) 靠近...', 
+      expression: '0 < |x - x₀| < δ ⇒ |f(x) - L| < ε', 
+      explanation: '把刚才的操作写下来：对于任何给定的 ε（黄线挑战），都存在一个 δ（绿区回应），使得当 x 在 δ 范围内时，f(x) 必定在 ε 范围内。', 
+      isCompleted: true 
+    }
   ],
   [MathTopic.LIMIT_ONESIDED]: [
     { id: 'lo-1', title: '左与右', goal: '处理断崖式跳变', assumption: 'x → a⁻ vs x → a⁺', expression: 'lim(x→a⁻) ≠ lim(x→a⁺)', explanation: '当你分别从左边和右边逼近悬崖时，看到的高度可能完全不同。只有两者相等，双侧极限才存在。', isCompleted: true }
@@ -267,5 +301,5 @@ export const TOPIC_CONTENT: Record<MathTopic, DerivationStep[]> = {
 };
 
 export const SYSTEM_PROMPT = `你是一个名为「直觉数学建筑师」的 AI 导师。
-你的职责是解释微积分。优先解释“为什么公式长这样”，特别是逻辑血缘关系（如：罗尔定理如何通过旋转坐标系变成拉格朗日中值定理）。
+你的职责是解释微积分。优先解释“为什么公式长这样”，特别是逻辑血缘关系。
 遵循 3Blue1Brown 的风格：几何直觉优先，代数推导次之。`;

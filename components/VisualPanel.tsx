@@ -93,15 +93,63 @@ const VisualPanel: React.FC<VisualPanelProps> = ({ state, onStateChange }) => {
         const L = coefficients.compiled.evaluate({ x: state.x0 });
         const eps = state.param1;
         const delta = state.param2;
+
         if (!isNaN(L) && isFinite(L)) {
-          svg.append('rect').attr('x', 0).attr('y', Math.min(yScale(L + eps), yScale(L - eps)))
-            .attr('width', width).attr('height', Math.abs(yScale(L + eps) - yScale(L - eps)))
-            .attr('fill', '#f59e0b').attr('opacity', 0.1);
-          svg.append('rect').attr('x', Math.min(xScale(state.x0 - delta), xScale(state.x0 + delta))).attr('y', 0)
-            .attr('width', Math.abs(xScale(state.x0 + delta) - xScale(state.x0 - delta))).attr('height', height)
-            .attr('fill', '#10b981').attr('opacity', 0.1);
+          // Validation Logic: Check if graph exits epsilon band WITHIN delta band
+          let isSafe = true;
+          // Sample points within [x0 - delta, x0 + delta]
+          const checkStep = delta / 20; 
+          for (let tx = state.x0 - delta; tx <= state.x0 + delta; tx += checkStep) {
+             const ty = coefficients.compiled.evaluate({x: tx});
+             if (Math.abs(ty - L) > eps) {
+                isSafe = false;
+                break;
+             }
+          }
+
+          const statusColor = isSafe ? '#10b981' : '#ef4444'; // Green or Red
           
-          svg.append('line').attr('x1', 0).attr('x2', width).attr('y1', yScale(L)).attr('y2', yScale(L)).attr('stroke', '#f59e0b').attr('stroke-dasharray', '4').attr('opacity', 0.3);
+          // Draw Epsilon Band (The Challenge) - Horizontal
+          svg.append('rect')
+            .attr('x', 0)
+            .attr('y', yScale(L + eps))
+            .attr('width', width)
+            .attr('height', Math.abs(yScale(L + eps) - yScale(L - eps)))
+            .attr('fill', '#f59e0b')
+            .attr('opacity', 0.1);
+
+          svg.append('line').attr('x1', 0).attr('x2', width).attr('y1', yScale(L + eps)).attr('y2', yScale(L + eps)).attr('stroke', '#f59e0b').attr('stroke-dasharray', '4').attr('opacity', 0.5);
+          svg.append('line').attr('x1', 0).attr('x2', width).attr('y1', yScale(L - eps)).attr('y2', yScale(L - eps)).attr('stroke', '#f59e0b').attr('stroke-dasharray', '4').attr('opacity', 0.5);
+
+          // Draw Delta Band (The Response) - Vertical
+          const xLeft = xScale(state.x0 - delta);
+          const xRight = xScale(state.x0 + delta);
+          
+          svg.append('line').attr('x1', xLeft).attr('x2', xLeft).attr('y1', 0).attr('y2', height).attr('stroke', statusColor).attr('stroke-width', 2).attr('opacity', 0.5);
+          svg.append('line').attr('x1', xRight).attr('x2', xRight).attr('y1', 0).attr('y2', height).attr('stroke', statusColor).attr('stroke-width', 2).attr('opacity', 0.5);
+
+          // Intersection Box (The Logic Zone)
+          svg.append('rect')
+             .attr('x', xLeft)
+             .attr('y', yScale(L + eps))
+             .attr('width', xRight - xLeft)
+             .attr('height', Math.abs(yScale(L + eps) - yScale(L - eps)))
+             .attr('fill', statusColor)
+             .attr('opacity', 0.2)
+             .attr('stroke', statusColor)
+             .attr('stroke-width', 1);
+
+          // Central Point
+          svg.append('circle').attr('cx', xScale(state.x0)).attr('cy', yScale(L)).attr('r', 4).attr('fill', statusColor);
+          
+          // Label
+          svg.append('text')
+            .attr('x', xRight + 5)
+            .attr('y', yScale(L) - 10)
+            .text(isSafe ? "SAFE (δ works)" : "FAIL (δ too big)")
+            .attr('fill', statusColor)
+            .attr('font-size', '10px')
+            .attr('font-weight', 'bold');
         }
       } catch (e) {}
     } 
@@ -143,12 +191,14 @@ const VisualPanel: React.FC<VisualPanelProps> = ({ state, onStateChange }) => {
         return (
           <div className="flex gap-6">
             <div className="flex items-center gap-3">
-               <span className="text-[10px] text-white/40 font-black tracking-widest uppercase">容差 ε</span>
-               <input type="range" min="0.05" max="1" step="0.01" value={state.param1} onChange={(e) => onStateChange({...state, param1: parseFloat(e.target.value)})} className="w-24 accent-amber-500" />
+               <span className="text-[10px] text-amber-500 font-black tracking-widest uppercase">Challenge ε</span>
+               <input type="range" min="0.1" max="2" step="0.1" value={state.param1} onChange={(e) => onStateChange({...state, param1: parseFloat(e.target.value)})} className="w-24 accent-amber-500" />
+               <span className="text-[10px] font-mono w-6">{state.param1.toFixed(1)}</span>
             </div>
             <div className="flex items-center gap-3">
-               <span className="text-[10px] text-white/40 font-black tracking-widest uppercase">范围 δ</span>
-               <input type="range" min="0.05" max="1" step="0.01" value={state.param2} onChange={(e) => onStateChange({...state, param2: parseFloat(e.target.value)})} className="w-24 accent-emerald-500" />
+               <span className="text-[10px] text-emerald-500 font-black tracking-widest uppercase">Response δ</span>
+               <input type="range" min="0.05" max="2" step="0.05" value={state.param2} onChange={(e) => onStateChange({...state, param2: parseFloat(e.target.value)})} className="w-24 accent-emerald-500" />
+               <span className="text-[10px] font-mono w-6">{state.param2.toFixed(2)}</span>
             </div>
           </div>
         );
