@@ -30,20 +30,28 @@ const AIChatPanel: React.FC<AIChatPanelProps> = ({ currentStep, visualState }) =
       timestamp: Date.now()
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    const newMessages = [...messages, userMessage];
+    setMessages(newMessages);
     setInputValue('');
     setIsTyping(true);
 
     try {
-      const visualContextStr = `Function: sin(x), x0: ${visualState.x0.toFixed(2)}, Order: ${visualState.order}`;
+      const visualContextStr = `Function: ${visualState.functionString}, x0: ${visualState.x0.toFixed(2)}, Order: ${visualState.order}`;
       const stepContextStr = `Current Step: ${currentStep.title}, Expression: ${currentStep.expression}, Logic: ${currentStep.explanation}`;
       
-      const stream = await sendMessageStream(inputValue, stepContextStr, visualContextStr);
+      // Pass the current message history to the AI service.
+      const historyForAI = messages.map(msg => ({
+        role: msg.role,
+        content: msg.content
+      }));
+      
+      const stream = await sendMessageStream(inputValue, stepContextStr, visualContextStr, historyForAI);
       
       let assistantMessageContent = '';
       setMessages(prev => [...prev, { role: 'model', content: '', timestamp: Date.now() }]);
 
       for await (const chunk of stream) {
+        // chunk is of type GenerateContentResponse, access .text property directly.
         const text = (chunk as GenerateContentResponse).text;
         if (text) {
           assistantMessageContent += text;
