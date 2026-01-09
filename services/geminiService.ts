@@ -1,8 +1,8 @@
-
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Chat } from "@google/genai";
 import { TOPIC_REGISTRY } from "../constants";
 import { MathTopic } from "../types";
 
+// Fix: Always use the named parameter and process.env.API_KEY for initialization
 const getAI = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const sendMessageStream = async (
@@ -12,12 +12,14 @@ export const sendMessageStream = async (
   visualStateStr: string,
   history: { role: 'user' | 'model', content: string }[] = []
 ) => {
+  // Fix: Create a new instance right before the call to ensure fresh configuration
   const ai = getAI();
   const manifest = TOPIC_REGISTRY[currentTopic];
   const topicPrompt = manifest?.aiSystemPrompt || "引导用户理解数学直觉。";
   
-  const chat = ai.chats.create({
-    model: 'gemini-3-flash-preview',
+  // Fix: Use 'gemini-3-pro-preview' for complex STEM/Math tasks and explicitly type the chat object
+  const chat: Chat = ai.chats.create({
+    model: 'gemini-3-pro-preview',
     config: {
       systemInstruction: `你是一个名为「直觉数学建筑师」的 AI 导师。
 遵循 3Blue1Brown 的风格：直观、优雅、侧重几何联系。
@@ -32,5 +34,6 @@ export const sendMessageStream = async (
     })),
   });
 
+  // Fix: sendMessageStream only accepts the message parameter as per SDK guidelines
   return chat.sendMessageStream({ message });
 };
