@@ -1,48 +1,31 @@
 
 import { GoogleGenAI } from "@google/genai";
-import { SYSTEM_PROMPT } from "../constants";
+import { TOPIC_REGISTRY } from "../constants";
+import { MathTopic } from "../types";
 
-// Correctly use process.env.API_KEY directly as per Gemini API rules.
 const getAI = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
-
-export const sendMessage = async (
-  message: string, 
-  currentStep: string, 
-  visualState: string,
-  history: { role: 'user' | 'model', content: string }[] = []
-) => {
-  const ai = getAI();
-  const chat = ai.chats.create({
-    model: 'gemini-3-flash-preview',
-    config: {
-      systemInstruction: `${SYSTEM_PROMPT}\n\n当前步骤状态: ${currentStep}\n当前图形状态: ${visualState}`,
-      temperature: 0.7,
-    },
-    // Pass chat history to maintain conversation context.
-    history: history.map(h => ({
-      role: h.role,
-      parts: [{ text: h.content }]
-    })),
-  });
-
-  const response = await chat.sendMessage({ message });
-  // response.text is a property, not a method.
-  return response.text;
-};
 
 export const sendMessageStream = async (
   message: string,
-  currentStep: string,
-  visualState: string,
+  currentTopic: MathTopic,
+  currentStepTitle: string,
+  visualStateStr: string,
   history: { role: 'user' | 'model', content: string }[] = []
 ) => {
   const ai = getAI();
+  const manifest = TOPIC_REGISTRY[currentTopic];
+  const topicPrompt = manifest?.aiSystemPrompt || "引导用户理解数学直觉。";
+  
   const chat = ai.chats.create({
     model: 'gemini-3-flash-preview',
     config: {
-      systemInstruction: `${SYSTEM_PROMPT}\n\n当前步骤状态: ${currentStep}\n当前图形状态: ${visualState}`,
+      systemInstruction: `你是一个名为「直觉数学建筑师」的 AI 导师。
+遵循 3Blue1Brown 的风格：直观、优雅、侧重几何联系。
+当前主题教学策略：${topicPrompt}
+当前步骤：${currentStepTitle}
+当前图形状态：${visualStateStr}
+请根据图像和步骤逻辑回答用户，避免枯燥的代数，多谈论“图像上的变化”。`,
     },
-    // Pass chat history to maintain conversation context.
     history: history.map(h => ({
       role: h.role,
       parts: [{ text: h.content }]
