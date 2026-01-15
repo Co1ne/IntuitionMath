@@ -3,7 +3,7 @@ services:
     build:
       context: .
       args:
-        # 这里的 API_KEY 会从 .env 文件中自动读取
+        # 这一步至关重要：将环境变量传给 Dockerfile 内部的 ARG
         - API_KEY=${API_KEY}
     image: intuition-math:latest
     container_name: intuition-math-app
