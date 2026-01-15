@@ -8,11 +8,11 @@ WORKDIR /app
 ARG API_KEY
 ENV API_KEY=${API_KEY}
 
-# 复制 package.json 和 package-lock.json
+# 复制 package.json
 COPY package*.json ./
 
 # 安装依赖
-RUN npm ci --legacy-peer-deps
+RUN npm install --legacy-peer-deps
 
 # 复制项目文件
 COPY . .
