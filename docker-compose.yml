@@ -1,12 +1,19 @@
-version: '3.8'
 services:
   math-architect:
     build:
       context: .
       args:
+        # 这里的 API_KEY 会从 .env 文件中自动读取
         - API_KEY=${API_KEY}
+    image: intuition-math:latest
+    container_name: intuition-math-app
     ports:
       - "8080:80"
     restart: always
     environment:
       - NODE_ENV=production
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
